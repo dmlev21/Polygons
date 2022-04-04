@@ -10,20 +10,25 @@ using System.Windows.Forms;
 
 namespace Многоугольники
 {
+    [Serializable]
     abstract class Shape : Form
     {
         protected int x;
         protected int y;
-        protected int dx;
-        protected int dy;
+        [NonSerialized] protected int dx;
+        [NonSerialized] protected int dx1;
+        [NonSerialized] protected int dy;
+        [NonSerialized] protected int dy1;
         protected static int R;
-        bool isHeld;
+        [NonSerialized] bool isHeld;
+        bool isInConvex;
 
         public Shape()
         {
             x = 0;
             y = 0;
             isHeld = false;
+            isInConvex = false;
         }
 
         static Shape() { R = 20; }
@@ -33,24 +38,25 @@ namespace Многоугольники
             this.x = x;
             this.y = y;
             isHeld = false;
+            isInConvex = false;
         }
 
         static public int Radius
         {
             get { return R; }
-            set { if (value >= 0) R = value; }
+            set { if (value > 0) R = value; }
         }
 
         public int X
         {
             get { return x; }
-            set {   if (value >= 0) x = value;  }
+            set { x = value;    }
         }
 
         public int Y
         {
             get { return y; }
-            set { if (value >= 0) y = value; }
+            set { y = value; }
         }
 
         public int Dx
@@ -59,10 +65,22 @@ namespace Многоугольники
             set { dx = value; }
         }
 
+        public int Dx1
+        {
+            get { return dx1; }
+            set { dx1 = value; }
+        }
+
         public int Dy
         {
             get { return dy; }
             set { dy = value; }
+        }
+
+        public int Dy1
+        {
+            get { return dy1; }
+            set { dy1 = value; }
         }
 
         public bool IsHeld
@@ -70,7 +88,13 @@ namespace Многоугольники
             get { return isHeld; }
             set { isHeld = value; }
         }
-        
+
+        public bool IsInConvex
+        {
+            get { return isInConvex; }
+            set { isInConvex = value; }
+        }
+
 
         public abstract void Draw(Graphics g);
         public abstract bool IsInside(int xx, int yy);
@@ -81,6 +105,7 @@ namespace Многоугольники
     //-----------------------------------------------------------------------------------------
 
 
+    [Serializable]
     class Circle : Shape
     {
         public Circle() : base() { }
@@ -103,6 +128,7 @@ namespace Многоугольники
     //-----------------------------------------------------------------------------------------
 
 
+    [Serializable]
     class Square : Shape
     {
         int a;
@@ -140,10 +166,11 @@ namespace Многоугольники
     //-----------------------------------------------------------------------------------------
 
 
+    [Serializable]
     class Triangle : Shape
     {
         int a;
-        Point pt1, pt2, pt3;
+        [NonSerialized] Point pt1, pt2, pt3;
 
         public Triangle() : base()
         {
@@ -176,11 +203,11 @@ namespace Многоугольники
 
         public override bool IsInside(int xx, int yy)
         {
-            double sk1 = (pt1.X - xx) * (pt2.Y - pt1.Y) - (pt2.X - pt1.X) * (pt1.Y - yy);
-            double sk2 = (pt2.X - xx) * (pt3.Y - pt2.Y) - (pt3.X - pt2.X) * (pt2.Y - yy);
-            double sk3 = (pt3.X - xx) * (pt1.Y - pt3.Y) - (pt1.X - pt3.X) * (pt3.Y - yy);
+            double crpr1 = (pt1.X - xx) * (pt2.Y - pt1.Y) - (pt2.X - pt1.X) * (pt1.Y - yy);
+            double crpr2 = (pt2.X - xx) * (pt3.Y - pt2.Y) - (pt3.X - pt2.X) * (pt2.Y - yy);
+            double crpr3 = (pt3.X - xx) * (pt1.Y - pt3.Y) - (pt1.X - pt3.X) * (pt3.Y - yy);
 
-            return ((sk1 >= 0 && sk2 >= 0 && sk3 >= 0) || (sk1 <= 0 && sk2 <= 0 && sk3 <= 0));
+            return ((crpr1 >= 0 && crpr2 >= 0 && crpr3 >= 0) || (crpr1 <= 0 && crpr2 <= 0 && crpr3 <= 0));
         }
     }
 }
